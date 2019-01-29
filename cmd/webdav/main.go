@@ -13,7 +13,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/hacdias/webdav"
+	"github.com/partitio/webdav"
 	"golang.org/x/crypto/bcrypt"
 	wd "golang.org/x/net/webdav"
 	yaml "gopkg.in/yaml.v2"
@@ -71,10 +71,31 @@ func parseRules(raw []map[string]interface{}) []*webdav.Rule {
 }
 
 func parseUsers(raw []map[string]interface{}, c *cfg) {
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	if adminPassword != "" {
+		username := "admin"
+		c.auth[username] = adminPassword
+
+		user := &webdav.User{
+			Scope:  c.webdav.User.Scope,
+			Modify: c.webdav.User.Modify,
+			Rules:  c.webdav.User.Rules,
+		}
+		user.Handler = &wd.Handler{
+			FileSystem: wd.Dir(user.Scope),
+			LockSystem: wd.NewMemLS(),
+		}
+
+		c.webdav.Users[username] = user
+	}
 	for _, r := range raw {
 		username, ok := r["username"].(string)
 		if !ok {
 			log.Fatal("user needs an username")
+		}
+
+		if username == "admin" && adminPassword != "" {
+			continue
 		}
 
 		password, ok := r["password"].(string)
