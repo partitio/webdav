@@ -1,0 +1,26 @@
+scope: /data
+address: 0.0.0.0
+port: 8080
+tls: false
+users:
+  - username: admin
+    password: admin
+
+#scope: /path/to/files
+#address: 0.0.0.0
+#port: 8080
+#tls: false
+#cert: cert.pem
+#key: key.pem
+#users:
+#  - username: admin
+#    password: admin
+#  - username: encrypted
+#    password: "{bcrypt}$2y$10$zEP6oofmXFeHaeMfBNLnP.DO8m.H.Mwhd24/TOX2MWLxAExXi4qgi"
+#  - username: basic
+#    password: basic
+#    modify:   false
+#    rules:
+#      - regex: false
+#      - allow: false
+#      - path: /some/file
