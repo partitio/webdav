@@ -254,7 +254,7 @@ func basicAuth(c *cfg) http.Handler {
 		}
 
 		if !checkPassword(p, password) {
-			logrus.Errorf("Wrong Password for user", username)
+			logrus.Errorf("Wrong Password for user: %s", username)
 			http.Error(w, "Not authorized", 401)
 			return
 		}
