@@ -87,7 +87,9 @@ func parseUsers(raw []map[string]interface{}, c *cfg) {
 			FileSystem: wd.Dir(user.Scope),
 			LockSystem: wd.NewMemLS(),
 			Logger: func(request *http.Request, e error) {
-				logrus.Error(e)
+				if e != nil {
+					logrus.Error(e)
+				}
 			},
 		}
 
