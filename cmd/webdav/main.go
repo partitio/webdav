@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/gorilla/handlers"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"log"
 	"net"
@@ -16,7 +18,7 @@ import (
 	"github.com/partitio/webdav"
 	"golang.org/x/crypto/bcrypt"
 	wd "golang.org/x/net/webdav"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -84,6 +86,9 @@ func parseUsers(raw []map[string]interface{}, c *cfg) {
 		user.Handler = &wd.Handler{
 			FileSystem: wd.Dir(user.Scope),
 			LockSystem: wd.NewMemLS(),
+			Logger: func(request *http.Request, e error) {
+				logrus.Error(e)
+			},
 		}
 
 		c.webdav.Users[username] = user
@@ -249,7 +254,7 @@ func basicAuth(c *cfg) http.Handler {
 		}
 
 		if !checkPassword(p, password) {
-			log.Println("Wrong Password for user", username)
+			logrus.Errorf("Wrong Password for user", username)
 			http.Error(w, "Not authorized", 401)
 			return
 		}
@@ -272,7 +277,7 @@ func main() {
 	flag.Parse()
 	cfg := parseConfig()
 	handler := basicAuth(cfg)
-
+	handler = handlers.LoggingHandler(os.Stdout, handler)
 	// Builds the address and a listener.
 	laddr := cfg.address + ":" + cfg.port
 	listener, err := net.Listen("tcp", laddr)
